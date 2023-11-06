@@ -12,9 +12,9 @@ int noOfSpecialSymbols = 10;
 
 void recognizeToken(char *curToken, int sz) {
 	printf("%s", curToken);
-	if (sz < 4) 
+	if (sz < 4)
 		printf("\t\t");
-	else if (sz < 8) 
+	else if (sz < 8)
 		printf("\t");
 
 	printf("\t\t");
@@ -36,7 +36,7 @@ void recognizeToken(char *curToken, int sz) {
 			return;
 		}
 	}
-	if (curToken[0] == '\"')  {
+	if (curToken[0] == '\"') {
 		printf("String\n");
 		return;
 	}
@@ -45,23 +45,20 @@ void recognizeToken(char *curToken, int sz) {
 }
 
 void lexParser(char *line, int sz) {
-
 	char *curToken = (char *)malloc(100);
 	int len = 0;
 	int stringState = 0;
-	for (int i = 0; i < sz; ++i)  {
+	for (int i = 0; i < sz; ++i) {
 		if (line[i] == '\"' && stringState) {
 			recognizeToken(curToken, len);
 			len = 0;
 			stringState = 0;
 			continue;
-		}
-		else if (line[i] == '\"') {
-			curToken[len++] = line[i];	
+		} else if (line[i] == '\"') {
+			curToken[len++] = line[i];
 			stringState = 1;
 			continue;
-		} 
-		else if (line[i] == ' ' || line[i] == '\t') {
+		} else if (line[i] == ' ' || line[i] == '\t') {
 			curToken[len] = '\0';
 			if (len == 0)
 				continue;
@@ -79,13 +76,12 @@ void lexParser(char *line, int sz) {
 }
 
 int main() {
-
 	FILE *fp = fopen("input.asw", "r");
 
 	if (!fp) {
 		printf("Failure\n");
 		return 0;
-	}	
+	}
 
 	size_t sz = 100;
 	char *line = (char *)malloc(sz);
@@ -94,12 +90,13 @@ int main() {
 	while ((noOfChar = getline(&line, &sz, fp)) != -1) {
 		--noOfChar;
 		line[noOfChar] = '\0';
-		lexParser(line, noOfChar);
+		// lexParser(line, noOfChar);
+		printf("%s %d\n", line, noOfChar);
 		// printf("\n");
 	}
 
 
-	free(line);	
+	free(line);
 
 	fclose(fp);
 }
