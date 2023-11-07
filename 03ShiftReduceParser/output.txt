@@ -1,0 +1,22 @@
+Enter the number of production rules: 4
+
+Enter the production rules (in the form 'left->right'): 
+E->E+E
+E->E*E
+E->(E)
+E->i
+
+Enter the input string: i*i+i
+
+i		*i+i	Shift i
+E		*i+i	Reduce E->i
+E*		i+i		Shift *
+E*i		+i		Shift i
+E*E		+i		Reduce E->i
+E		+i		Reduce E->E*E
+E+		i		Shift +
+E+i				Shift i
+E+E				Reduce E->i
+E				Reduce E->E+E
+
+Accepted

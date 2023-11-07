@@ -1,0 +1,12 @@
+Enter the Expression: w:=a*b+c/d-e/f+g*h
+
+Intermediate code:
+
+Z := c/d		
+Y := e/f		
+X := a*b		
+W := g*h		
+V := X+Z		
+U := Y+W		
+T := V-U		
+w := T

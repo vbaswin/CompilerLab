@@ -1,0 +1,22 @@
+Enter the string: i*(i+i)
+
+Input			Action
+--------------------------------
+i*(i+i)         E -> T E'
+i*(i+i)         T -> F T'
+i*(i+i)         F -> i
+*(i+i)          T' -> * F T'
+(i+i)           F -> ( E )
+i+i)            E -> T E'
+i+i)            T -> F T'
+i+i)            F -> i
++i)             T' -> $
++i)             E' -> + T E'
+i)              T -> F T'
+i)              F -> i
+)               T' -> $
+)               E' -> $
+                T' -> $
+                E' -> $
+--------------------------------
+String is successfully parsed

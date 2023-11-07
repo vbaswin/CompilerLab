@@ -1,0 +1,40 @@
+int			Keyword
+i			Identifier
+=			Operator
+20			Identifier
+;			specialSymbol
+
+
+if			Keyword
+(			specialSymbol
+a			Identifier
+>			Identifier
+b			Identifier
+)			specialSymbol
+{			specialSymbol
+
+}			specialSymbol
+else			Keyword
+{			specialSymbol
+
+}			specialSymbol
+
+
+for			Identifier
+(			specialSymbol
+int			Keyword
+i			Identifier
+=			Operator
+0			Identifier
+;			specialSymbol
+i			Identifier
+<			Identifier
+20			Identifier
+;			specialSymbol
+++i			Identifier
+)			specialSymbol
+
+display			Keyword
+(			specialSymbol
+"Hello"			String
+)			specialSymbol
