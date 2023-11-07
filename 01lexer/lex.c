@@ -12,9 +12,9 @@ int noOfSpecialSymbols = 10;
 
 void recognizeToken(char *curToken, int sz) {
 	printf("%s", curToken);
-	if (sz < 4)
-		printf("\t\t");
-	else if (sz < 8)
+	if (sz <= 4)
+		printf("\t");
+	else if (sz <= 8)
 		printf("\t");
 
 	printf("\t\t");
@@ -49,14 +49,23 @@ void lexParser(char *line, int sz) {
 	int len = 0;
 	int stringState = 0;
 	for (int i = 0; i < sz; ++i) {
-		if (line[i] == '\"' && stringState) {
-			recognizeToken(curToken, len);
-			len = 0;
-			stringState = 0;
-			continue;
-		} else if (line[i] == '\"') {
+		if (line[i] == '\"') {
+			if (stringState) {
+				curToken[len++] = '"';	  // ;)
+				// printf("STring: %s\n", curToken);
+				recognizeToken(curToken, len);
+				++i;
+				len = 0;
+				// printf("char : %c\n", line[--i]);
+				stringState = 0;
+				continue;
+			} else {
+				curToken[len++] = line[i];
+				stringState = 1;
+				continue;
+			}
+		} else if (stringState) {
 			curToken[len++] = line[i];
-			stringState = 1;
 			continue;
 		} else if (line[i] == ' ' || line[i] == '\t') {
 			curToken[len] = '\0';
@@ -70,7 +79,12 @@ void lexParser(char *line, int sz) {
 		}
 		curToken[len++] = line[i];
 	}
-	recognizeToken(curToken, len);
+	if (len != 0) {
+		curToken[len] = '\0';
+		recognizeToken(curToken, len);
+		len = 0;
+	}
+	// recognizeToken(curToken, len);
 
 	free(curToken);
 }
@@ -90,9 +104,9 @@ int main() {
 	while ((noOfChar = getline(&line, &sz, fp)) != -1) {
 		--noOfChar;
 		line[noOfChar] = '\0';
-		// lexParser(line, noOfChar);
-		printf("%s %d\n", line, noOfChar);
-		// printf("\n");
+		// printf("%s %d\n", line, noOfChar);
+		lexParser(line, noOfChar);
+		printf("\n");
 	}
 
 
