@@ -1,0 +1,36 @@
+int		Keyword
+i		Identifier
+=		Relational Operator
+2		Digit
+0		Digit
+;		Special Character
+if		Keyword
+(		Special Character
+a		Identifier
+>		Relational Operator
+b		Identifier
+)		Special Character
+{		Special Character
+}		Special Character
+else	Keyword
+{		Special Character
+}		Special Character
+for		Keyword
+(		Special Character
+int		Keyword
+i		Identifier
+=		Relational Operator
+0		Digit
+;		Special Character
+i		Identifier
+<		Relational Operator
+2		Digit
+0		Digit
+;		Special Character
+++		Unary Operator
+i		Identifier
+)		Special Character
+display	Identifier
+(		Special Character
+"Hello"	String
+)		Special Character

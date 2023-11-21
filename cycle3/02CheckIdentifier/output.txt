@@ -1,0 +1,15 @@
+Enter the identifier: new2Identifier
+
+Valid Identifier!!
+
+Enter the identifier: 2Identifier
+
+Invalid Identifier!!
+
+Enter the identifier: 2_ Identifier
+
+Invalid Identifier!!
+
+Enter the identifier: _2Identifier
+
+Invalid Identifier!!

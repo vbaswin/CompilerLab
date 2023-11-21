@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 int yylex(void);
-int yyerror(char* s);
+void yyerror(char* s);
 %}
 
 %token NUMBER
@@ -29,6 +29,6 @@ int main() {
 	yyparse();
 }
 
-int yyerror(char* s) {
+void yyerror(char* s) {
 	printf("\nExpression is invalid!!\n");
 }

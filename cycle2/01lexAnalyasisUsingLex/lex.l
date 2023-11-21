@@ -46,7 +46,8 @@ return { printf("%s\tKeyword\n", yytext); }
 "(" |
 ")" |
 "{" |
-"}" {printf("%s\tSpecial Character\n", yytext);}
+"}" |
+"." {printf("%s\tSpecial Character\n", yytext);}
 
 [0-9]	{printf("%s\tDigit\n", yytext);}
 

@@ -1,0 +1,3 @@
+programming
+Vowels: 3
+Consonants: 8

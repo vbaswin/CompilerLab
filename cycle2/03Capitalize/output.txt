@@ -1,0 +1,6 @@
+abc
+ABC
+programmabc
+programmABC
+someabcexit
+someABCexit

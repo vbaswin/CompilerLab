@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 int yylex(void);
-int yyerror();
+int yyerror(char *s);
 %}
 
 %token DIGIT LETTER NL
@@ -27,7 +27,7 @@ int main() {
 	return 0;
 }
 
-int yyerror() {
+int yyerror(char *s) {
 	printf("\nInvalid Identifier!!\n");
 	exit(0);
 }
