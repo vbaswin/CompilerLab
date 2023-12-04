@@ -52,7 +52,7 @@ void constantPropagation(int expNo, exp expns[expNo]) {
 				expns[i].flag = 1;
 				propagate(i, temp, expns[i].var, expNo, expns);
 				change = 1;
-				output(expNo, expns);
+				// output(expNo, expns);
 			}
 		}
 	}
@@ -89,6 +89,6 @@ void output(int expNo, exp expns[expNo]) {
 	printf("\n\nOptimised Code\n");
 
 	for (int i = 0; i < expNo; ++i) {
-		printf("%s %s %c %s %d\n", expns[i].var, expns[i].operand1, expns[i].operator, expns[i].operand2, expns[i].flag);
+		printf("%s %s %c %s\n", expns[i].var, expns[i].operand1, expns[i].operator, expns[i].operand2);
 	}
 }
