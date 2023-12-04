@@ -1,0 +1,40 @@
+Enter no of exp: 4
+a 5 + 6
+b a + a
+d c + a
+c 5 = -1 
+
+
+Optimised Code
+11 5 + 6 1
+b 11 + 11 0
+d c + 11 0
+c 5 = -1 0
+
+
+Optimised Code
+11 5 + 6 1
+22 11 + 11 1
+d c + 11 0
+c 5 = -1 0
+
+
+Optimised Code
+11 5 + 6 1
+22 11 + 11 1
+d 5 + 11 0
+5 5 = -1 1
+
+
+Optimised Code
+11 5 + 6 1
+22 11 + 11 1
+16 5 + 11 1
+5 5 = -1 1
+
+
+Optimised Code
+11 5 + 6 1
+22 11 + 11 1
+16 5 + 11 1
+5 5 = -1 1
