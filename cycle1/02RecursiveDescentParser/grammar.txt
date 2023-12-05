@@ -1,5 +1,5 @@
 E 	→	TE′
-E′ 	→	+TE′
+E′ 	→	+TE′|ε
 T	→	FT′
 T′	→	∗FT′|ε
-F	→	(E)|id
+F	→	(E)|i
