@@ -20,7 +20,7 @@ typedef struct followValue {
 } followValue;
 
 void display(int n, prod prodns[n]);
-void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[]);
+void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[], followValue followValues[]);
 
 int checkTerminal(char ch, int noOfNonTerminals, char nonTerminals[]) {
 	for (int i = 0; i < noOfNonTerminals; ++i) {
@@ -66,7 +66,6 @@ void first(int n, prod prodns[], int noOfNonTerminals, firstValue firstValues[],
 	int prodnsDone[n];
 	clearDone(n, prodnsDone);
 
-
 	for (int i = 0; i < noOfNonTerminals; ++i) {
 		int nonTerm = firstValues[i].nonTerminal;
 
@@ -84,6 +83,41 @@ void first(int n, prod prodns[], int noOfNonTerminals, firstValue firstValues[],
 	// firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, 3, 2, prodnsDone);
 	// 	firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, 6, 4);
 	// 	firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, curProd, 4);
+}
+
+void followRecursive(int n, prod prodns[], int noOfNonTerminals, followValue followValues[], char nonTerminals[], int curNonTerminal, int followDone[]) {
+	char ch = nonTerminals[curNonTerminal];
+
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < prodns[i].length; ++j) {
+			if (prodns[i].right[j] == ch) {
+				if (j == prodns[i].length - 1) {
+					//
+				} else {
+					int nonTerminalPos = checkTerminal(prodns[i].right[j + 1], noOfNonTerminals, nonTerminals);
+					// this is a terminal
+					if (nonTerminalPos == -1) {
+						// printf("\nfollow::: %c\t%s\n", ch, followValues[curNonTerminal].follow);
+						// printf("prev: %s\tneeded: %c\n", followValues[curNonTerminal].follow, prodns[i].right[j + 1]);
+						followValues[curNonTerminal].follow[followValues[curNonTerminal].followLen++] = prodns[i].right[j + 1];
+					}
+				}
+			}
+			followDone[curNonTerminal] = 1;
+		}
+	}
+}
+
+void follow(int n, prod prodns[], int noOfNonTerminals, followValue followValues[], char nonTerminals[]) {
+	int followDone[noOfNonTerminals];
+	clearDone(noOfNonTerminals, followDone);
+
+	followValues[0].follow[0] = '$';
+	++followValues[0].followLen;
+
+	for (int k = 0; k < noOfNonTerminals; ++k) {
+		followRecursive(n, prodns, noOfNonTerminals, followValues, nonTerminals, k, followDone);
+	}
 }
 
 int main() {
@@ -145,21 +179,16 @@ int main() {
 		memset(followValues[i].follow, '\0', 20);
 	}
 
-	// printf("%s\n", nonTerminals);
 
-	// for (int i = 0; i < noOfNonTerminals; ++i)
-	// printf("%c %d %c %d\n", firstValues[i].nonTerminal, firstValues[i].firstLen, followValues[i].nonTerminal, followValues[i].followLen);
-
-	// printf("%d\n", checkTerminal('(', noOfNonTerminals, nonTerminals));
-
-	// firstValues[4].first[0] = '(';
-	// firstValues[4].first[1] = 'i';
-
-	// firstValues[4].firstLen = 1;
+	// followValues[3].follow[0] = '$';
+	// ++followValues[3].followLen;
 
 	first(n, prodns, noOfNonTerminals, firstValues, nonTerminals);
 
-	displayFirstFollow(noOfNonTerminals, firstValues);
+	follow(n, prodns, noOfNonTerminals, followValues, nonTerminals);
+
+
+	displayFirstFollow(noOfNonTerminals, firstValues, followValues);
 	return 0;
 }
 
@@ -170,7 +199,7 @@ void display(int n, prod prodns[n]) {
 	}
 }
 
-void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[]) {
+void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[], followValue followValues[]) {
 	for (int i = 0; i < noOfNonTerminals; ++i) {
 		printf("%c\t\t{ ", firstValues[i].nonTerminal);
 		int len = firstValues[i].firstLen;
@@ -180,6 +209,17 @@ void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[]) {
 		}
 		for (int j = 0; j < len - 1; ++j)
 			printf("%c, ", firstValues[i].first[j]);
-		printf("%c }\n", firstValues[i].first[len - 1]);
+		printf("%c }", firstValues[i].first[len - 1]);
+
+
+		printf("\t\t{ ");
+		len = followValues[i].followLen;
+		if (!len) {
+			printf(" }\n");
+			continue;
+		}
+		for (int j = 0; j < len - 1; ++j)
+			printf("%c, ", followValues[i].follow[j]);
+		printf("%c }\n", followValues[i].follow[len - 1]);
 	}
 }
