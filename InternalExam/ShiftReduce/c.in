@@ -1,6 +1,18 @@
+6
+E->E+T
+E->T
+T->T*F
+T->F
+F->(E) 
+F->i
+i*i
+
+
+// another input -> for which the program works  
+
 4
 E->E+E
 E->E*E
 E->(E)
 E->i
-i*(i+(i*i))
+i*i
