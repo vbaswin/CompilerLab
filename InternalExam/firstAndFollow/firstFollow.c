@@ -97,8 +97,9 @@ void followRecursive(int n, prod prodns[], int noOfNonTerminals, followValue fol
 	int nonTerminalPos;
 
 	for (int i = 0; i < n; ++i) {
+		int epsilonPresent = 0;
 		for (int j = 0; j < prodns[i].length; ++j) {
-			if (prodns[i].right[j] == ch) {
+			if (prodns[i].right[j] == ch || epsilonPresent) {
 				if (j == prodns[i].length - 1) {
 					if (ch != prodns[i].left) {
 						nonTerminalPos = checkTerminal(prodns[i].left, noOfNonTerminals, nonTerminals);
@@ -124,10 +125,11 @@ void followRecursive(int n, prod prodns[], int noOfNonTerminals, followValue fol
 					} else {
 						if (noRepeat[nonTerminalPos])
 							continue;
+						epsilonPresent = 0;
 						for (int k = 0; k < firstValues[nonTerminalPos].firstLen; ++k) {
 							char firstCh = firstValues[nonTerminalPos].first[k];
 							if (firstCh == '#') {
-								//
+								epsilonPresent = 1;
 							} else {
 								followValues[curNonTerminal].follow[followValues[curNonTerminal].followLen++] = firstCh;
 							}
@@ -236,6 +238,7 @@ void display(int n, prod prodns[n]) {
 }
 
 void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[], followValue followValues[]) {
+	printf("NonTerminal\tFirst\t\t\tFollow\n\n");
 	for (int i = 0; i < noOfNonTerminals; ++i) {
 		printf("%c\t\t{ ", firstValues[i].nonTerminal);
 		int len = firstValues[i].firstLen;
