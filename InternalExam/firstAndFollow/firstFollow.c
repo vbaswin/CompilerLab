@@ -100,19 +100,20 @@ void followRecursive(int n, prod prodns[], int noOfNonTerminals, followValue fol
 		for (int j = 0; j < prodns[i].length; ++j) {
 			if (prodns[i].right[j] == ch) {
 				if (j == prodns[i].length - 1) {
-					nonTerminalPos = checkTerminal(prodns[i].left, noOfNonTerminals, nonTerminals);
+					if (ch != prodns[i].left) {
+						nonTerminalPos = checkTerminal(prodns[i].left, noOfNonTerminals, nonTerminals);
 
-					// follow has been found for left non-terminal
-					if (followDone[nonTerminalPos]) {
-						printf("Before: {%s} {%s} %d\n", followValues[curNonTerminal].follow, followValues[nonTerminalPos].follow, followValues[curNonTerminal].followLen);
-						strcat(followValues[curNonTerminal].follow, followValues[nonTerminalPos].follow);
-						followValues[curNonTerminal].followLen += followValues[nonTerminalPos].followLen;
-						printf("Before: {%s} {%s} %d\n", followValues[curNonTerminal].follow, followValues[nonTerminalPos].follow, followValues[curNonTerminal].followLen);
+						// follow has been found for left non-terminal
+						if (followDone[nonTerminalPos]) {
+							strcat(followValues[curNonTerminal].follow, followValues[nonTerminalPos].follow);
+							followValues[curNonTerminal].followLen += followValues[nonTerminalPos].followLen;
+						} else {
+							followRecursive(n, prodns, noOfNonTerminals, followValues, firstValues, nonTerminals, nonTerminalPos, followDone);
+							strcat(followValues[curNonTerminal].follow, followValues[nonTerminalPos].follow);
+							followValues[curNonTerminal].followLen += followValues[nonTerminalPos].followLen;
+						}
 						noRepeat[nonTerminalPos] = 1;
-					} else {
-						// followRecursive(n, prodns, noOfNonTerminals, followValues, firstValues, nonTerminals, nonTerminalPos, followDone);
 					}
-
 				} else {
 					nonTerminalPos = checkTerminal(prodns[i].right[j + 1], noOfNonTerminals, nonTerminals);
 					// this is a terminal
