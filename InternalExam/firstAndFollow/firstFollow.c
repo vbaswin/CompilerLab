@@ -56,8 +56,42 @@ void firstRecursive(int n, prod prodns[], int noOfNonTerminals, firstValue first
 	if (firstValues[nonTerminalPos].firstLen) {
 		// printf("\nfirst::: %c\t%s\n", nonTerminals[nonTerminalPos], firstValues[nonTerminalPos].first);
 		// printf("prev: %s\tneeded: %s\n", firstValues[curNonTerminal].first, firstValues[nonTerminalPos].first);
-		strcat(firstValues[curNonTerminal].first, firstValues[nonTerminalPos].first);
-		firstValues[curNonTerminal].firstLen += firstValues[nonTerminalPos].firstLen;
+		// strcat(firstValues[curNonTerminal].first, firstValues[nonTerminalPos].first);
+		int epsilonPresent = 0;
+		for (int m = 0; m < prodns[curProd].length; ++m) {
+			for (int k = 0; k < firstValues[nonTerminalPos].firstLen; ++k) {
+				char firstCh = firstValues[nonTerminalPos].first[k];
+				if (firstCh == '#') {
+					if (!epsilonPresent)
+						firstValues[curNonTerminal].first[firstValues[curNonTerminal].firstLen++] = firstCh;
+					epsilonPresent = 1;
+				} else {
+					firstValues[curNonTerminal].first[firstValues[curNonTerminal].firstLen++] = firstCh;
+				}
+			}
+			if (epsilonPresent) {
+				if (m != (prodns[curProd].length - 1)) {
+					// printf("hello\n");
+					char nextCh = prodns[curProd].right[m + 1];
+					nonTerminalPos = checkTerminal(nextCh, noOfNonTerminals, nonTerminals);
+					// printf("hehe: %c\n", nextCh);
+
+					int nextTerminalProd;
+					for (int p = 0; p < n; ++p) {
+						if (prodns[p].left == nextCh) {
+							nextTerminalProd = p;
+							break;
+						}
+					}
+
+					firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, nextTerminalProd, nonTerminalPos, prodnsDone);
+					epsilonPresent = 0;
+				}
+			} else
+				break;
+		}
+
+		// firstValues[curNonTerminal].firstLen += firstValues[nonTerminalPos].firstLen;
 		prodnsDone[curProd] = 1;
 	}
 }

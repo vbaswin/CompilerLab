@@ -1,9 +1,6 @@
-8
-E->TR
-R->+TR
-R->#
-T->FY
-Y->*FY
-Y->#
-F->(E)
-F->i
+5
+S->AB
+A->a
+A->#
+B->b
+B->epsilon
