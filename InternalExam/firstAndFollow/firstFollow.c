@@ -25,9 +25,9 @@ void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[]);
 int checkTerminal(char ch, int noOfNonTerminals, char nonTerminals[]) {
 	for (int i = 0; i < noOfNonTerminals; ++i) {
 		if (nonTerminals[i] == ch)
-			return 0;
+			return i;
 	}
-	return 1;
+	return -1;
 }
 
 void clearDone(int len, int done[]) {
@@ -36,18 +36,22 @@ void clearDone(int len, int done[]) {
 
 void firstRecursive(int n, prod prodns[], int noOfNonTerminals, firstValue firstValues[], char nonTerminals[], int curProd, int curNonTerminal, int prodnsDone[]) {
 	char ch = prodns[curProd].right[0];
+	int nonTerminalPos = checkTerminal(ch, noOfNonTerminals, nonTerminals);
 
-	if (checkTerminal(ch, noOfNonTerminals, nonTerminals)) {
+	if (nonTerminalPos == -1) {
 		// int len = firstValues[curNonTerminal].firstLen;
 
-		firstValues[curNonTerminal].first[++firstValues[curNonTerminal].firstLen] = ch;
+		firstValues[curNonTerminal].first[firstValues[curNonTerminal].firstLen++] = ch;
 		// printf("Hello\n");
 		prodnsDone[curProd] = 1;
 		return;
 	}
 
-
-
+	for (int i = 0; i < n; ++i) {
+		if (prodns[i].left == ch && !prodnsDone[i])
+			firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, i, nonTerminalPos, prodnsDone);
+	}
+	// concat first or nonTerminalPos
 	// printf("%c %c %d\n", prodns[curProd].right[0], firstValues[curNonTerminal].first[len - 1], firstValues[curNonTerminal].firstLen);
 }
 
@@ -60,7 +64,7 @@ void first(int n, prod prodns[], int noOfNonTerminals, firstValue firstValues[],
 		int nonTerm = firstValues[i].nonTerminal;
 
 		for (int j = 0; j < n; ++j) {
-			if (prodns[j].left == nonTerm) {
+			if (prodns[j].left == nonTerm && !prodnsDone[j]) {
 				firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, j, i, prodnsDone);
 			}
 		}
@@ -102,8 +106,8 @@ int main() {
 	firstValues[0].nonTerminal = ch;
 	followValues[0].nonTerminal = ch;
 
-	firstValues[0].firstLen = -1;
-	followValues[0].followLen = -1;
+	firstValues[0].firstLen = 0;
+	followValues[0].followLen = 0;
 
 	char nonTerminals[20];
 	nonTerminals[0] = ch;
@@ -125,8 +129,8 @@ int main() {
 		firstValues[noOfNonTerminals].nonTerminal = ch;
 		followValues[noOfNonTerminals].nonTerminal = ch;
 
-		firstValues[noOfNonTerminals].firstLen = -1;
-		followValues[noOfNonTerminals++].followLen = -1;
+		firstValues[noOfNonTerminals].firstLen = 0;
+		followValues[noOfNonTerminals++].followLen = 0;
 	}
 
 	// printf("%s\n", nonTerminals);
@@ -158,12 +162,12 @@ void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[]) {
 	for (int i = 0; i < noOfNonTerminals; ++i) {
 		printf("%c\t\t{ ", firstValues[i].nonTerminal);
 		int len = firstValues[i].firstLen;
-		if (len == -1) {
+		if (!len) {
 			printf(" }\n");
 			continue;
 		}
-		for (int j = 0; j < len; ++j)
+		for (int j = 0; j < len - 1; ++j)
 			printf("%c, ", firstValues[i].first[j]);
-		printf("%c }\n", firstValues[i].first[len]);
+		printf("%c }\n", firstValues[i].first[len - 1]);
 	}
 }
