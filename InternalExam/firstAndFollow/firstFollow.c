@@ -36,13 +36,13 @@ void clearDone(int len, int done[]) {
 
 void firstRecursive(int n, prod prodns[], int noOfNonTerminals, firstValue firstValues[], char nonTerminals[], int curProd, int curNonTerminal, int prodnsDone[]) {
 	char ch = prodns[curProd].right[0];
+	// printf("\nCurrent nonTerminal: %c\n", ch);
 	int nonTerminalPos = checkTerminal(ch, noOfNonTerminals, nonTerminals);
 
 	if (nonTerminalPos == -1) {
-		// int len = firstValues[curNonTerminal].firstLen;
-
 		firstValues[curNonTerminal].first[firstValues[curNonTerminal].firstLen++] = ch;
-		// printf("Hello\n");
+		firstValues[curNonTerminal].first[firstValues[curNonTerminal].firstLen] = '\0';
+
 		prodnsDone[curProd] = 1;
 		return;
 	}
@@ -51,8 +51,15 @@ void firstRecursive(int n, prod prodns[], int noOfNonTerminals, firstValue first
 		if (prodns[i].left == ch && !prodnsDone[i])
 			firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, i, nonTerminalPos, prodnsDone);
 	}
+
 	// concat first or nonTerminalPos
-	// printf("%c %c %d\n", prodns[curProd].right[0], firstValues[curNonTerminal].first[len - 1], firstValues[curNonTerminal].firstLen);
+	if (firstValues[nonTerminalPos].firstLen) {
+		// printf("\nfirst::: %c\t%s\n", nonTerminals[nonTerminalPos], firstValues[nonTerminalPos].first);
+		// printf("prev: %s\tneeded: %s\n", firstValues[curNonTerminal].first, firstValues[nonTerminalPos].first);
+		strcat(firstValues[curNonTerminal].first, firstValues[nonTerminalPos].first);
+		firstValues[curNonTerminal].firstLen += firstValues[nonTerminalPos].firstLen;
+		prodnsDone[curProd] = 1;
+	}
 }
 
 void first(int n, prod prodns[], int noOfNonTerminals, firstValue firstValues[], char nonTerminals[]) {
@@ -74,7 +81,7 @@ void first(int n, prod prodns[], int noOfNonTerminals, firstValue firstValues[],
 	// printf("%d\n", prodnsDone[i]);
 
 	// 	int curProd = 7;
-	// 	firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, 2, 1);
+	// firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, 3, 2, prodnsDone);
 	// 	firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, 6, 4);
 	// 	firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, curProd, 4);
 }
@@ -131,6 +138,11 @@ int main() {
 
 		firstValues[noOfNonTerminals].firstLen = 0;
 		followValues[noOfNonTerminals++].followLen = 0;
+	}
+
+	for (int i = 0; i < noOfNonTerminals; ++i) {
+		memset(firstValues[i].first, '\0', 20);
+		memset(followValues[i].follow, '\0', 20);
 	}
 
 	// printf("%s\n", nonTerminals);
