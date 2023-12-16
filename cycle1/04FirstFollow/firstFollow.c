@@ -1,267 +1,243 @@
-// C program to calculate the First and
-// Follow sets of a given grammar
-#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
-// Functions to calculate Follow
-void followfirst(char, int, int);
-void follow(char c);
+typedef struct prod {
+	char left;
+	char right[20];
+	int length;
+} prod;
 
-// Function to calculate First
-void findfirst(char, int, int);
+typedef struct firstValue {
+	char nonTerminal;
+	char first[20];
+	int firstLen;
+} firstValue;
 
-int count, n = 0;
+typedef struct followValue {
+	char nonTerminal;
+	char follow[20];
+	int followLen;
+} followValue;
 
-// Stores the final result
-// of the First Sets
-char calc_first[10][100];
+void display(int n, prod prodns[n]);
+void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[], followValue followValues[]);
 
-// Stores the final result
-// of the Follow Sets
-char calc_follow[10][100];
-int m = 0;
+int checkTerminal(char ch, int noOfNonTerminals, char nonTerminals[]) {
+	for (int i = 0; i < noOfNonTerminals; ++i) {
+		if (nonTerminals[i] == ch)
+			return i;
+	}
+	return -1;
+}
 
-// Stores the production rules
-char production[20][10];
-char f[10], first[10];
-int k;
-char ck;
-int e;
+void clearDone(int len, int done[]) {
+	memset(done, 0, sizeof(int) * len);
+}
 
-int main(int argc, char **argv) {
-	int jm = 0;
-	int km = 0;
-	int i, choice;
-	char c, ch;
-	count = 8;
+void firstRecursive(int n, prod prodns[], int noOfNonTerminals, firstValue firstValues[], char nonTerminals[], int curProd, int curNonTerminal, int prodnsDone[]) {
+	char ch = prodns[curProd].right[0];
+	// printf("\nCurrent nonTerminal: %c\n", ch);
+	int nonTerminalPos = checkTerminal(ch, noOfNonTerminals, nonTerminals);
 
+	if (nonTerminalPos == -1) {
+		firstValues[curNonTerminal].first[firstValues[curNonTerminal].firstLen++] = ch;
+		firstValues[curNonTerminal].first[firstValues[curNonTerminal].firstLen] = '\0';
+
+		prodnsDone[curProd] = 1;
+		return;
+	}
+
+	for (int i = 0; i < n; ++i) {
+		if (prodns[i].left == ch && !prodnsDone[i])
+			firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, i, nonTerminalPos, prodnsDone);
+	}
+
+	// concat first or nonTerminalPos
+	if (firstValues[nonTerminalPos].firstLen) {
+		strcat(firstValues[curNonTerminal].first, firstValues[nonTerminalPos].first);
+		firstValues[curNonTerminal].firstLen += firstValues[nonTerminalPos].firstLen;
+		prodnsDone[curProd] = 1;
+	}
+}
+
+void first(int n, prod prodns[], int noOfNonTerminals, firstValue firstValues[], char nonTerminals[]) {
+	int prodnsDone[n];
+	clearDone(n, prodnsDone);
+
+	for (int i = 0; i < noOfNonTerminals; ++i) {
+		int nonTerm = firstValues[i].nonTerminal;
+
+		for (int j = 0; j < n; ++j) {
+			if (prodns[j].left == nonTerm && !prodnsDone[j]) {
+				firstRecursive(n, prodns, noOfNonTerminals, firstValues, nonTerminals, j, i, prodnsDone);
+			}
+		}
+	}
+}
+
+void followRecursive(int n, prod prodns[], int noOfNonTerminals, followValue followValues[], firstValue firstValues[], char nonTerminals[], int curNonTerminal, int followDone[]) {
+	// printf("Hello %c\n", nonTerminals[curNonTerminal]);
+	char ch = nonTerminals[curNonTerminal];
+
+	if (followDone[curNonTerminal])
+		return;
+
+	int noRepeat[noOfNonTerminals];
+	memset(noRepeat, 0, sizeof(int) * noOfNonTerminals);
+	int nonTerminalPos;
+
+	for (int i = 0; i < n; ++i) {
+		int epsilonPresent = 0;
+		for (int j = 0; j < prodns[i].length; ++j) {
+			if (prodns[i].right[j] == ch || epsilonPresent) {
+				if (j == prodns[i].length - 1) {
+					if (ch != prodns[i].left) {
+						nonTerminalPos = checkTerminal(prodns[i].left, noOfNonTerminals, nonTerminals);
+
+						// follow has been found for left non-terminal
+						if (followDone[nonTerminalPos]) {
+							strcat(followValues[curNonTerminal].follow, followValues[nonTerminalPos].follow);
+							followValues[curNonTerminal].followLen += followValues[nonTerminalPos].followLen;
+						} else {
+							followRecursive(n, prodns, noOfNonTerminals, followValues, firstValues, nonTerminals, nonTerminalPos, followDone);
+							strcat(followValues[curNonTerminal].follow, followValues[nonTerminalPos].follow);
+							followValues[curNonTerminal].followLen += followValues[nonTerminalPos].followLen;
+						}
+						noRepeat[nonTerminalPos] = 1;
+					}
+				} else {
+					nonTerminalPos = checkTerminal(prodns[i].right[j + 1], noOfNonTerminals, nonTerminals);
+					// this is a terminal
+					if (nonTerminalPos == -1) {
+						followValues[curNonTerminal].follow[followValues[curNonTerminal].followLen++] = prodns[i].right[j + 1];
+					} else {
+						if (noRepeat[nonTerminalPos])
+							continue;
+						epsilonPresent = 0;
+						for (int k = 0; k < firstValues[nonTerminalPos].firstLen; ++k) {
+							char firstCh = firstValues[nonTerminalPos].first[k];
+							if (firstCh == '#') {
+								epsilonPresent = 1;
+							} else {
+								followValues[curNonTerminal].follow[followValues[curNonTerminal].followLen++] = firstCh;
+							}
+						}
+						noRepeat[nonTerminalPos] = 1;
+					}
+				}
+			}
+		}
+	}
+	followDone[curNonTerminal] = 1;
+}
+
+void follow(int n, prod prodns[], int noOfNonTerminals, followValue followValues[], firstValue firstvalues[], char nonTerminals[]) {
+	int followDone[noOfNonTerminals];
+	clearDone(noOfNonTerminals, followDone);
+
+	followValues[0].follow[0] = '$';
+	++followValues[0].followLen;
+
+	for (int k = 0; k < noOfNonTerminals; ++k) {
+		followRecursive(n, prodns, noOfNonTerminals, followValues, firstvalues, nonTerminals, k, followDone);
+	}
+}
+
+int main() {
+	freopen("c.in", "r", stdin);
+
+	int n;
 	printf("Enter no of productions: ");
-	scanf("%d", &count);
+	scanf("%d", &n);
 
+	prod prodns[n];
 
-	printf("\nEnter the production rules (in the form 'left=right', Epsilon is represented by '#'): \n");
-	for (int i = 0; i < count; ++i)
-		scanf("%s", production[i]);
-
-	// strcpy(production[0], "X=TnS");
-	// The Input grammar
-	// strcpy(production[0], "X=TnS");
-	// strcpy(production[1], "X=Rm");
-	// strcpy(production[2], "T=q");
-	// strcpy(production[3], "T=#");
-	// strcpy(production[4], "S=p");
-	// strcpy(production[5], "S=#");
-	// strcpy(production[6], "R=om");
-	// strcpy(production[7], "R=ST");
-
-	int kay;
-	char done[count];
-	int ptr = -1;
-
-	// Initializing the calc_first array
-	for (k = 0; k < count; k++) {
-		for (kay = 0; kay < 100; kay++) {
-			calc_first[k][kay] = '!';
-		}
+	printf("Enter productions, epsilon is represented by '#'\n");
+	for (int i = 0; i < n; ++i) {
+		// The space before %c in the format string is used to consume any leading whitespace characters (such as newline characters) left in the input buffer
+		scanf(" %c->%s", &prodns[i].left, prodns[i].right);
+		prodns[i].length = strlen(prodns[i].right);
 	}
-	int point1 = 0, point2, xxx;
 
-	for (k = 0; k < count; k++) {
-		c = production[k][0];
-		point2 = 0;
-		xxx = 0;
+	firstValue firstValues[n];
+	followValue followValues[n];
 
-		// Checking if First of c has
-		// already been calculated
-		for (kay = 0; kay <= ptr; kay++)
-			if (c == done[kay])
-				xxx = 1;
+	char ch = prodns[0].left;
 
-		if (xxx == 1)
-			continue;
+	firstValues[0].nonTerminal = ch;
+	followValues[0].nonTerminal = ch;
 
-		// Function call
-		findfirst(c, 0, 0);
-		ptr += 1;
+	firstValues[0].firstLen = 0;
+	followValues[0].followLen = 0;
 
-		// Adding c to the calculated list
-		done[ptr] = c;
-		printf("\nFirst(%c) = { ", c);
-		calc_first[point1][point2++] = c;
+	char nonTerminals[20];
+	nonTerminals[0] = ch;
 
-		// Printing the First Sets of the grammar
-		for (i = 0 + jm; i < n; i++) {
-			int lark = 0, chk = 0;
+	int noOfNonTerminals = 1;
 
-			for (lark = 0; lark < point2; lark++) {
-				if (first[i] == calc_first[point1][lark]) {
-					chk = 1;
-					break;
-				}
-			}
-			if (chk == 0) {
-				printf("%c, ", first[i]);
-				calc_first[point1][point2++] = first[i];
-			}
-		}
-		printf("}");
-		jm = n;
-		point1++;
-	}
-	printf("\n\n");
-	// printf("-----------------------------------------------"
-	// 	   "\n\n");
-	char donee[count];
-	ptr = -1;
-
-	// Initializing the calc_follow array
-	for (k = 0; k < count; k++) {
-		for (kay = 0; kay < 100; kay++) {
-			calc_follow[k][kay] = '!';
-		}
-	}
-	point1 = 0;
-	int land = 0;
-	for (e = 0; e < count; e++) {
-		ck = production[e][0];
-		point2 = 0;
-		xxx = 0;
-
-		// Checking if Follow of ck
-		// has already been calculated
-		for (kay = 0; kay <= ptr; kay++)
-			if (ck == donee[kay])
-				xxx = 1;
-
-		if (xxx == 1)
-			continue;
-		land += 1;
-
-		// Function call
-		follow(ck);
-		ptr += 1;
-
-		// Adding ck to the calculated list
-		donee[ptr] = ck;
-		printf("Follow(%c) = { ", ck);
-		calc_follow[point1][point2++] = ck;
-
-		// Printing the Follow Sets of the grammar
-		for (i = 0 + km; i < m; i++) {
-			int lark = 0, chk = 0;
-			for (lark = 0; lark < point2; lark++) {
-				if (f[i] == calc_follow[point1][lark]) {
-					chk = 1;
-					break;
-				}
-			}
-			if (chk == 0) {
-				printf("%c, ", f[i]);
-				calc_follow[point1][point2++] = f[i];
-			}
-		}
-		printf(" }\n");
-		km = m;
-		point1++;
-	}
-}
-
-void follow(char c) {
-	int i, j;
-
-	// Adding "$" to the follow
-	// set of the start symbol
-	if (production[0][0] == c) {
-		f[m++] = '$';
-	}
-	for (i = 0; i < 10; i++) {
-		for (j = 2; j < 10; j++) {
-			if (production[i][j] == c) {
-				if (production[i][j + 1] != '\0') {
-					// Calculate the first of the next
-					// Non-Terminal in the production
-					followfirst(production[i][j + 1], i,
-								(j + 2));
-				}
-
-				if (production[i][j + 1] == '\0' && c != production[i][0]) {
-					// Calculate the follow of the
-					// Non-Terminal in the L.H.S. of the
-					// production
-					follow(production[i][0]);
-				}
-			}
-		}
-	}
-}
-
-void findfirst(char c, int q1, int q2) {
-	int j;
-
-	// The case where we
-	// encounter a Terminal
-	if (!(isupper(c))) {
-		first[n++] = c;
-	}
-	for (j = 0; j < count; j++) {
-		if (production[j][0] == c) {
-			if (production[j][2] == '#') {
-				if (production[q1][q2] == '\0')
-					first[n++] = '#';
-				else if (production[q1][q2] != '\0' && (q1 != 0 || q2 != 0)) {
-					// Recursion to calculate First of New
-					// Non-Terminal we encounter after
-					// epsilon
-					findfirst(production[q1][q2], q1,
-							  (q2 + 1));
-				} else
-					first[n++] = '#';
-			} else if (!isupper(production[j][2])) {
-				first[n++] = production[j][2];
-			} else {
-				// Recursion to calculate First of
-				// New Non-Terminal we encounter
-				// at the beginning
-				findfirst(production[j][2], j, 3);
-			}
-		}
-	}
-}
-
-void followfirst(char c, int c1, int c2) {
-	int k;
-
-	// The case where we encounter
-	// a Terminal
-	if (!(isupper(c)))
-		f[m++] = c;
-	else {
-		int i = 0, j = 1;
-		for (i = 0; i < count; i++) {
-			if (calc_first[i][0] == c)
+	for (int i = 1; i < n; ++i) {
+		int j;
+		for (j = 0; j < i; ++j) {
+			if (prodns[j].left == prodns[i].left)
 				break;
 		}
+		if (j < i)
+			continue;
 
-		// Including the First set of the
-		// Non-Terminal in the Follow of
-		// the original query
-		while (calc_first[i][j] != '!') {
-			if (calc_first[i][j] != '#') {
-				f[m++] = calc_first[i][j];
-			} else {
-				if (production[c1][c2] == '\0') {
-					// Case where we reach the
-					// end of a production
-					follow(production[c1][0]);
-				} else {
-					// Recursion to the next symbol
-					// in case we encounter a "#"
-					followfirst(production[c1][c2], c1,
-								c2 + 1);
-				}
-			}
-			j++;
+		char ch = prodns[i].left;
+
+		nonTerminals[noOfNonTerminals] = ch;
+		firstValues[noOfNonTerminals].nonTerminal = ch;
+		followValues[noOfNonTerminals].nonTerminal = ch;
+
+		firstValues[noOfNonTerminals].firstLen = 0;
+		followValues[noOfNonTerminals++].followLen = 0;
+	}
+
+	for (int i = 0; i < noOfNonTerminals; ++i) {
+		memset(firstValues[i].first, '\0', 20);
+		memset(followValues[i].follow, '\0', 20);
+	}
+
+
+	first(n, prodns, noOfNonTerminals, firstValues, nonTerminals);
+
+	follow(n, prodns, noOfNonTerminals, followValues, firstValues, nonTerminals);
+
+
+	displayFirstFollow(noOfNonTerminals, firstValues, followValues);
+	return 0;
+}
+
+void display(int n, prod prodns[n]) {
+	for (int i = 0; i < n; ++i) {
+		// The space before %c in the format string is used to consume any leading whitespace characters (such as newline characters) left in the input buffer
+		printf("%c->%s %d", prodns[i].left, prodns[i].right, prodns[i].length);
+	}
+}
+
+void displayFirstFollow(int noOfNonTerminals, firstValue firstValues[], followValue followValues[]) {
+	printf("NonTerminal\tFirst\t\t\tFollow\n\n");
+	for (int i = 0; i < noOfNonTerminals; ++i) {
+		printf("%c\t\t{ ", firstValues[i].nonTerminal);
+		int len = firstValues[i].firstLen;
+		if (!len) {
+			printf(" }\n");
+			continue;
 		}
+		for (int j = 0; j < len - 1; ++j)
+			printf("%c, ", firstValues[i].first[j]);
+		printf("%c }", firstValues[i].first[len - 1]);
+
+
+		printf("\t\t{ ");
+		len = followValues[i].followLen;
+		if (!len) {
+			printf(" }\n");
+			continue;
+		}
+		for (int j = 0; j < len - 1; ++j)
+			printf("%c, ", followValues[i].follow[j]);
+		printf("%c }\n", followValues[i].follow[len - 1]);
 	}
 }
