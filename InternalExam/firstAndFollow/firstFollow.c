@@ -193,7 +193,7 @@ void follow(int n, prod prodns[], int noOfNonTerminals, followValue followValues
 }
 
 int main() {
-	freopen("c.in", "r", stdin);
+	// freopen("c.in", "r", stdin);
 
 	int n;
 	printf("Enter no of productions: ");
